@@ -1,7 +1,49 @@
 /** VERSION =============================================================== *
- *  hrs3143:jqext.js  ^  david.turgeon @ wf  ^  2011-08-28 .. 2011-11-13
+ *  jq-drt.extend.js  ^  dvdrtrgn  ^  2011-08-28 .. 2011-12-12
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 (function($){
+
+    // begin HELPERS
+    /**
+     * Always wrap val in an array and try swapping in #control.val()
+     * for any given potential index number in that array
+     * @param me {controls}
+     * @param val {mixed}
+     * return {array}
+     */
+    function normalizeVal(me, val){
+        var a, i, tmp;
+        if (me.attr('type').match('select')){
+            me = me.children();
+        }
+        if (typeof val !== 'object'){
+            val = [val];
+        }
+        for (i = 0; i < val.length; i++){
+            a = val[i];
+            if (typeof a === 'number' && a < me.length) {
+                tmp = me.eq(a).val();
+                if (tmp) {
+                    val[i] = tmp;
+                }
+            }
+        }
+        return val;
+    }
+    function serializeVal(me){
+        // help jquery to do with checkboxes as select-multi
+        return {
+            val: function(){
+                var arr = [], i;
+                for (i = 0; i < me.length; i++){
+                    arr.push( me[i].value );
+                }
+                return arr;
+            }
+        };
+    }
+    // end HELPERS
+
     $.loadCssFor = function (nom, cb){
         var href = $.jsPath(nom)
         ,   ele
@@ -29,9 +71,11 @@
         if ( $.standard() || !document.createStyleSheet ){
             ele.appendTo($('head')) // append first! then add href
             .attr('href', href);
-        } else ele = (function (path){
-            return document.createStyleSheet(path);
-        })(href);
+        } else {
+            ele = (function (path){
+                return document.createStyleSheet(path);
+            })(href);
+        }
         console.log('jQuery.linkStyle', href, $.standard() || 'IE style');
 
         $(cb); // callback
@@ -46,10 +90,12 @@
         return (function(nom){
             var ele = $('script[src*="'+nom+'."]')
             ;
-            if (!ele.length)
+            if (!ele.length) {
                 throw new Error('No script with path fragment: '+ nom);
-            if (ele.length > 1)
+            }
+            if (ele.length > 1){
                 console.warn('Multiple scripts with that path fragment');
+            }
             return ele.eq(0).attr('src').split('/').slice(0,-1).join('/');
         })(nom);
     };
@@ -64,7 +110,9 @@
         ;
         scr.setAttribute('type', 'text/javascript');
         scr.setAttribute('charset', 'utf-8');
-        if (id) scr.setAttribute('id', id);
+        if (id) {
+            scr.setAttribute('id', id);
+        }
         scr.setAttribute('src', url);
         document.getElementsByTagName('head')[0].appendChild(scr);
     };
@@ -101,17 +149,27 @@
      */
     $.findObj = function(str){
         var all = [];
-        if (typeof str !== 'string')
-            str = str.name || str[0] && str[0].name || 'null';
-        if (str)
+        if (typeof str !== 'string'){
+            str = (str.name || (str[0] && str[0].name) || 'null');
+        }
+        if (str){
             all = $('[name="'+ str +'"]');  // name
-        if (all.length) return all;
-        all = $('#'+str);               // id
-        if (all.length) return all;
-        all = $('.'+ str);              // class
-        if (all.length) return all;
-        all = $(str);                   // tag
-        if (all.length) return all;
+        }
+        if (all.length) {
+            return all;
+        }
+        all = $('#'+str);   // id
+        if (all.length) {
+            return all;
+        }
+        all = $('.'+ str);  // class
+        if (all.length) {
+            return all;
+        }
+        all = $(str);       // tag
+        if (all.length) {
+            return all;
+        }
         return false;
     };
 
@@ -127,15 +185,19 @@
     $.fn.formVal = function(val){
         var fN = '$.fn.fldVal'
         ,   me = $.findObj(this)    // get all
+        ,   i
         ;
-        if (!me.length || !me.attr('form'))
+        if (!me.length || !me.attr('form')){
             throw new Error(fN + ' : no form : ' + me[0]);
+        }
 
         if (val !== undefined){ // SET
-            if (arguments.length > 1)
+            if (arguments.length > 1){
                 val = Tools.args.arr(arguments);
-            if (me.attr('disabled'))
+            }
+            if (me.attr('disabled')){
                 return clog(fN, me, 'disabled');
+            }
             val = normalizeVal(me, val);
 
             switch(me.attr('type')){
@@ -143,13 +205,16 @@
                     return me;
                 case 'radio': case 'checkbox':
                     me.val(val);
-                    for (var i = 0; i < val.length; i++) { // ghostClick
+                    for (i = 0; i < val.length; i++) { // ghostClick
                         me.filter("[value='"+val[i]+"']").click();
                     }
                     return me.val(val); /// set after click to prevent unclick
                 case 'select-multiple': // multi
                     return me.focus().val(val);
-                case 'select-one': case 'text': case 'textarea': default:
+                // case 'select-one':
+                // case 'text':
+                // case 'textarea':
+                default:
                     return me.val(val[0]);
             }
         } else { // GET
@@ -159,10 +224,15 @@
                 case 'radio':
                 case 'checkbox':
                     me = me.filter(':checked');
-                    if (me.length > 1) me = serializeVal(me);
+                    if (me.length >1) {
+                        me = serializeVal(me);
+                    }
                     return me.val();
-                case 'select-one': case 'select-multiple':
-                case 'text': case 'textarea': default:
+                // case 'select-one':
+                // case 'select-multiple':
+                // case 'text':
+                // case 'textarea':
+                default:
                     return me.val();
             }
         }
@@ -175,45 +245,15 @@
      * @return {drtField}
      */
     $.fn.drt = function(idx){
-        if (typeOf(idx) === 'string') idx = {
-            id: idx
-        }; else idx = this[(idx||0) % this.length];
+        if (typeOf(idx) === 'string') {
+            idx = {
+                id: idx
+            };
+        } else {
+            idx = this[(idx||0) % this.length];
+        }
         return theForm[idx.id || idx.name];
     };
-
-    // begin HELPERS
-    /**
-     * Always wrap val in an array and try swapping in #control.val()
-     * for any given potential index number in that array
-     * @param me {controls}
-     * @param val {mixed}
-     * return {array}
-     */
-    function normalizeVal(me, val){
-        if (me.attr('type').match('select'))
-            me = me.children();
-        if (typeof val !== 'object')
-            val = [val];
-        for (var a, i = 0; i < val.length; i++){
-            a = val[i];
-            if (typeof a === 'number' && a < me.length) {
-                var tmp = me.eq(a).val();
-                if (tmp) val[i] = tmp;
-            }
-        }
-        return val;
-    }
-    function serializeVal(me){
-        return {
-            val: function(){
-                var arr = [], i;
-                for (i = 0; i < me.length; i++)
-                    arr.push( me[i].value );
-                return arr;
-            }
-        // help jquery to do with checkboxes as select-multi
-        }
-    } // end HELPERS
 
 })(jQuery);
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */

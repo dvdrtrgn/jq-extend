@@ -44,7 +44,7 @@
      */
     $.jsPath = function (nom){
         return (function(nom){
-            var ele = $('script[src*='+nom+'.]')
+            var ele = $('script[src*="'+nom+'."]')
             ;
             if (!ele.length)
                 throw new Error('No script with path fragment: '+ nom);

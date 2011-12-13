@@ -3,47 +3,66 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 (function($){
 
-    // begin HELPERS
+    // PRIVATE scope
     /**
-     * Always wrap val in an array and try swapping in #control.val()
-     * for any given potential index number in that array
-     * @param me {controls}
-     * @param val {mixed}
-     * return {array}
+     * A normalized value is an array of values
+     * that swaps index numbers with values at list[index]
+     *
+     * @param list {nodelist}
+     * @param vals {array}
+     * @return {array}
      */
-    function normalizeVal(me, val){
+    function normalVal(list, vals){
         var a, i, tmp;
-        if (me.attr('type').match('select')){
-            me = me.children();
+        // deal at the atomic level (option elements)
+        if (list.prop('type').match('select')){
+            list = list.children();
         }
-        if (typeof val !== 'object'){
-            val = [val];
+        if (typeof vals !== 'object'){
+            vals = [vals];
         }
-        for (i = 0; i < val.length; i++){
-            a = val[i];
-            if (typeof a === 'number' && a < me.length) {
-                tmp = me.eq(a).val();
-                if (tmp) {
-                    val[i] = tmp;
-                }
+        for (i = 0; i < vals.length; i++){
+            // for each number in array that is smaller than list length
+            a = vals[i];
+            if (typeof a === 'number' && a < list.length) {
+                tmp = list.eq(a).val();
+                if (tmp) vals[i] = tmp;
+            // if we get a value at that index replace it with an actual value
             }
         }
-        return val;
+        return vals;
     }
-    function serializeVal(me){
-        // help jquery to do with checkboxes as select-multi
+    /**
+     *  Force jquery handle radios/checkboxes as $(select-multi).val()
+     *      given a collection in argument
+     *      make pseudo-jq object with val method that
+     *      extracts to an array the value props in collection
+     *  @param list {nodelist} live collection
+     *  @return {pseudo.jq} a highly specific pseudo-jq
+     */
+    function serialVal(list){
+        // deal at the atomic level (option elements)
+        if (list.prop('type').match('select')){
+            return list;
+        }
         return {
             val: function(){
                 var arr = [], i;
-                for (i = 0; i < me.length; i++){
-                    arr.push( me[i].value );
+                for (i = 0; i < list.length; i++){
+                    arr.push( list[i].value );
                 }
-                return arr;
+                return arr; // return all values in collection
             }
         };
     }
-    // end HELPERS
-
+    // end PRIVATE
+    /**
+     *  Seek and load module css
+     *
+     *  @param nom {string} name of mod
+     *  @param cb {function} callback when loaded
+     *  @return {element} the link to style
+     */
     $.loadCssFor = function (nom, cb){
         var href = $.jsPath(nom)
         ,   ele
@@ -56,10 +75,13 @@
     };
 
     /**
-     *  Identify here if we are on a targeted browser /or/ reference platform
+     *  Identify here if we are on a compliant browser
+     *
+     *  @return {bool}
      */
     $.standard = function (){
-        return (!this.browser.msie); // possible other tests
+        // possible other tests
+        return (!this.browser.msie);
     };
 
     /**
@@ -69,8 +91,8 @@
         var ele = this('<link rel="stylesheet" type="text/css">')
         ;
         if ( $.standard() || !document.createStyleSheet ){
-            ele.appendTo($('head')) // append first! then add href
-            .attr('href', href);
+            ele.appendTo($('head'))
+            .attr('href', href);    // append first! then add href
         } else {
             ele = (function (path){
                 return document.createStyleSheet(path);
@@ -84,6 +106,7 @@
 
     /**
      * Get path to script by name
+     *
      * @param nom {string} to search for
      */
     $.jsPath = function (nom){
@@ -101,7 +124,9 @@
     };
 
     /**
-     * Generic (cross-domain/non-XHR) script loader, no XSS headache
+     * Generic (cross-domain/non-XHR) script loader
+     * no XSS headache
+     *
      * @param url {string} path to script
      * @param id {string} optional element id
      */
@@ -119,6 +144,7 @@
 
     /**
      * Keep these fields in sync with one another
+     *
      * @param fld1 {element}
      * @param fld2 {element}
      */
@@ -144,6 +170,7 @@
 
     /**
      * Extend jquery to simulate mm findObj
+     *
      * @param str {string/element} name
      * @return {jq}
      */
@@ -179,6 +206,7 @@
 
     /**
      * JQ mod to deliver field values
+     *
      * @param val {mixed}
      * @return {mixed}
      */
@@ -187,7 +215,7 @@
         ,   me = $.findObj(this)    // get all
         ,   i
         ;
-        if (!me.length || !me.attr('form')){
+        if (!me.length || !me.prop('form')){
             throw new Error(fN + ' : no form : ' + me[0]);
         }
 
@@ -198,9 +226,9 @@
             if (me.attr('disabled')){
                 return clog(fN, me, 'disabled');
             }
-            val = normalizeVal(me, val);
+            val = normalVal(me, val);
 
-            switch(me.attr('type')){
+            switch(me.prop('type')){
                 case 'submit':
                     return me;
                 case 'radio': case 'checkbox':
@@ -218,14 +246,14 @@
                     return me.val(val[0]);
             }
         } else { // GET
-            switch(me.attr('type')){
+            switch(me.prop('type')){
                 case 'submit':
                     return null;
                 case 'radio':
                 case 'checkbox':
                     me = me.filter(':checked');
                     if (me.length >1) {
-                        me = serializeVal(me);
+                        me = serialVal(me);
                     }
                     return me.val();
                 // case 'select-one':
@@ -241,6 +269,7 @@
     /**
      * JQ mod to deliver the drtField object
      * this only works from an instance of $
+     *
      * @param idx {string number element}
      * @return {drtField}
      */
@@ -254,6 +283,14 @@
         }
         return theForm[idx.id || idx.name];
     };
+    $.fn.ext = {
+        test : {
+            normalVal: normalVal,
+            serialVal: serialVal
+        }
+    };
+    // regress for <jq 1.6
+    $.fn.prop = $.fn.prop ? $.fn.prop : $.fn.attr;
 
 })(jQuery);
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */

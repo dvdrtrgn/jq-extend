@@ -5,12 +5,14 @@
 
     // PRIVATE scope
     /**
+     * A form concern with numbered field options
      * A normalized value is an array of values
      * that swaps index numbers with values at list[index]
      *
      * @param list {nodelist}
      * @param vals {array}
      * @return {array}
+     * @private
      */
     function _normalVal(list, vals){
         var a, i, tmp;
@@ -33,12 +35,15 @@
         return vals;
     }
     /**
-     *  Force jquery handle radios/checkboxes as $(select-multi).val()
-     *      given a collection in argument
-     *      make pseudo-jq object with val method that
-     *      extracts to an array the value props in collection
-     *  @param list {nodelist} live collection
-     *  @return {pseudo.jq} a highly specific pseudo-jq
+     * A form handling enhancement
+     * Force jquery handle radios/checkboxes as $(select-multi).val()
+     *  given a collection in argument
+     *  make pseudo-jq object with val method that
+     *  extracts to an array the value props in collection
+     *
+     * @param list {nodelist} live collection
+     * @return {pseudo.jq} a highly specific pseudo-jq
+     * @private
      */
     function _serialVal(list){
         // deal at the atomic level (option elements)

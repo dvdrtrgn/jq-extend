@@ -1,5 +1,15 @@
 #stub
 my extensions for jquery
 
-attempts at
-providing what I am unaware about that is already available (or not)
+Purpose
+    providing what I am unaware about that is already available (or not)
+
+Interface
+    maintain a layer of skin above the guts for legacy and consistency of approach
+
+Philosophy
+    consider only things that would seem to naturally fit into jq proper
+
+Inventory (brief)
+    use docs to fully describe inside
+

@@ -9,8 +9,8 @@ jQuery(function(){
         '<div id="qunit-fixture"></div>');
 });
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-    module("NULL");
-    test('empty',function(){
-        equal(2+2, 4, 'duh 2+2');
-    });
+module("NULL");
+test('empty',function(){
+    equal(2+2, 4, 'duh 2+2');
+});
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */

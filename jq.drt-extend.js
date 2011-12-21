@@ -12,7 +12,7 @@
      * @param vals {array}
      * @return {array}
      */
-    function normalVal(list, vals){
+    function _normalVal(list, vals){
         var a, i, tmp;
         // deal at the atomic level (option elements)
         if (list.prop('type').match('select')){
@@ -40,7 +40,7 @@
      *  @param list {nodelist} live collection
      *  @return {pseudo.jq} a highly specific pseudo-jq
      */
-    function serialVal(list){
+    function _serialVal(list){
         // deal at the atomic level (option elements)
         if (list.prop('type').match('select')){
             return list;
@@ -226,7 +226,7 @@
             if (me.attr('disabled')){
                 return clog(fN, me, 'disabled');
             }
-            val = normalVal(me, val);
+            val = _normalVal(me, val);
 
             switch(me.prop('type')){
                 case 'submit':
@@ -253,7 +253,7 @@
                 case 'checkbox':
                     me = me.filter(':checked');
                     if (me.length >1) {
-                        me = serialVal(me);
+                        me = _serialVal(me);
                     }
                     return me.val();
                 // case 'select-one':
@@ -284,9 +284,9 @@
         return theForm[idx.id || idx.name];
     };
     $.fn.ext = {
-        test : {
-            normalVal: normalVal,
-            serialVal: serialVal
+        priv : {
+            normalVal: _normalVal,
+            serialVal: _serialVal
         }
     };
     // regress for <jq 1.6

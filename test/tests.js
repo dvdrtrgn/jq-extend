@@ -3,42 +3,48 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 /*
 Demo
-    equal
-    deepEqual
-    strictEqual
+    the value functions of the jq-extend ($.ext)
  */
-var vars;
+var etc;
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 $(function(){
-    vars = {
-        priv: $.fn.ext.test,
-        menu: $('#Menu-1'),
+    etc = {
+        _my_: $.fn.ext.priv,
+        menu: $('#Menu-0'),
         radi: $.findObj('Radio')
-    }
+    };
 
-    module("EXT");
+    module("general");
+
     test('total opts', function(){
-        equal(vars.menu.children().length, 8,'8 atomized options in select');
+        equal(etc.menu.children().length, 5,'5 sub-value options in Menu.');
+    });
+
+    //
+
+    module("$.fn.ext privates");
+
+    test('serialVal', function(){
+        deepEqual(
+            etc._my_.serialVal( etc.menu ).val(),
+            etc.menu.val(),
+            'Mimic transforming the compound-input argument \n\
+             (in this case Menu) into value array.'
+            );
+        notDeepEqual(
+            etc.radi.val(),
+            etc._my_.serialVal( etc.radi ).val(),
+            'Work with other sub-values (in this case Radio[0,1])\n\
+             as jq does with "select-multiples" but FAILS otherwise.'
+            );
     });
 
     test('normalVal', function(){
         deepEqual(
-            vars.priv.normalVal( vars.menu, [1,9,3] ),
-            ['Aaa', 9, 'Ccc'],
-            'matching and swapping probable integers in value array'
-            );
-    });
-
-    test('serialVal', function(){
-        deepEqual(
-            vars.priv.serialVal( vars.menu ).val(),
-            vars.menu.val(),
-            'transform compound-input argument into static val method'
-            );
-        notDeepEqual(
-            vars.radi.val(),
-            vars.priv.serialVal( vars.radi ).val(),
-            'jq NEEDS to serialize compound-inputs like it does with <select>'
+            etc._my_.normalVal( etc.menu, [-9,0,2,9] ),
+            [-9,'blank','opt_v2', 9],
+            'Match and swap the (possible) value indexes in array\n\
+             [-9,0,2,9] from Menu.'
             );
     });
 });

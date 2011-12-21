@@ -9,30 +9,33 @@
         <script src="../../jq-extend/jq.drt-extend.js"></script>
         <script src="boot.js"></script>
         <script src="tests.js"></script>
+        <style>
+            #Form-0 * { border: 1px solid gray; padding: 6px; margin: 6px; display: inline-block; }
+        </style>
     </head>
     <body>
-        <form name="Form" id="Form-1">
-            <strong>Menu</strong>
-            <select name="Menu" id="Menu-1" multiple="multiple">
-                <option value="blank">--</option>
-                <option selected="selected">Aaa</option>
-                <option selected="selected">Bbb</option>
-                <option>Ccc</option>
-                <option>Ddd</option>
-                <option>Eee</option>
-                <option>Fff</option>
-                <option>Ggg</option>
-            </select>
-            <input name="_type_INFO_NewWork_Phone" type="text" size="16" class="inactive">
-            <hr>
-            <strong>Radi</strong>
+        <form name="Form" id="Form-0">
             <label>
-                <input name="Radio" id="Radio-0" type="radio" value="Aaa">
-                Radio-0 </label>
-            <label>
-                <input name="Radio" id="Radio-1" type="radio" value="Bbb">
-                Radio-1 </label>
-            <hr>
+                <strong>Menu</strong>
+                <select name="Menu" id="Menu-0" multiple="multiple">
+                    <option value="blank">--</option>
+                    <option selected="selected">opt_v1</option>
+                    <option>opt_v2</option>
+                    <option selected="selected">opt_v3</option>
+                    <option>opt_v4</option>
+                </select>
+            </label>
+            <fieldset>
+                <strong>Radio</strong>
+                <label>
+                    Radio-0
+                    <input name="Radio" id="Radio-0" type="radio" value="rad_v0">
+                </label>
+                <label>
+                    Radio-1
+                    <input name="Radio" id="Radio-1" type="radio" value="rad_v1">
+                </label>
+            </fieldset>
         </form>
     </body>
 </html>
